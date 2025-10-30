@@ -1,0 +1,105 @@
+/* Admin Settings Page Styles */
+.faq-gen-ai-settings-page {
+    background: #fff;
+    padding: 20px;
+    margin-top: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.form-table th {
+    width: 200px;
+    font-weight: 600;
+}
+
+.form-table td {
+    padding: 15px 10px;
+}
+
+.form-table input[type="text"],
+.form-table input[type="url"],
+.form-table input[type="password"],
+.form-table textarea,
+.form-table select {
+    width: 100%;
+    max-width: 500px;
+}
+
+.form-table .description {
+    color: #666;
+    font-style: italic;
+    margin-top: 5px;
+}
+
+/* Shortcode Reference Table */
+.widefat {
+    margin-top: 20px;
+    border: 1px solid #ddd;
+}
+
+.widefat thead th {
+    background: #f5f5f5;
+    font-weight: 600;
+    padding: 12px;
+}
+
+.widefat tbody td {
+    padding: 10px 12px;
+}
+
+.widefat code {
+    background: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: #d63638;
+    font-family: 'Courier New', monospace;
+}
+
+/* Preview Box in Admin */
+.faq-preview-box {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.faq-preview-box h3 {
+    margin-top: 0;
+    color: #23282d;
+}
+
+.faq-preview-item {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.faq-preview-item:last-child {
+    margin-bottom: 0;
+}
+
+/* TinyMCE Dialog Styles */
+.mce-container-body .mce-textbox {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+.mce-container-body .mce-label {
+    font-weight: 600;
+}
+
+/* Notice Styles */
+.notice.faq-gen-ai-notice {
+    border-left-width: 4px;
+    padding: 12px;
+}
+
+.notice.faq-gen-ai-notice.notice-success {
+    border-left-color: #46b450;
+}
+
+.notice.faq-gen-ai-notice.notice-info {
+    border-left-color: #00a0d2;
+}
