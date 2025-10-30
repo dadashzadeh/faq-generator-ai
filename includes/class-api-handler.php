@@ -21,7 +21,7 @@ class FAQ_Gen_AI_API_Handler {
     private function load_config() {
         $this->config = array(
             'base_url'      => get_option('faq_gen_ai_base_url', 'https://api.openai.com/v1'),
-            'model'         => get_option('faq_gen_ai_model', 'gpt-3.5-turbo'),
+            'model'         => get_option('faq_gen_ai_model', 'gpt-5-nano'),
             'temperature'   => floatval(get_option('faq_gen_ai_temperature', 0.5)),
             'api_key'       => get_option('faq_gen_ai_api_key'),
             'system_prompt' => get_option('faq_gen_ai_system_prompt', $this->get_default_system_prompt()),

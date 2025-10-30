@@ -61,7 +61,7 @@ class FAQ_Gen_AI_Settings {
             'faq_gen_ai_base_url',
             array(
                 'type' => 'string',
-                'sanitize_callback' => array($this, 'sanitize_url'),
+                'sanitize_callback' => array($this, 'sanitize_base_url'),
                 'default' => 'https://api.openai.com/v1'
             )
         );
@@ -70,6 +70,25 @@ class FAQ_Gen_AI_Settings {
             'faq_gen_ai_base_url',
             __('API Base URL', 'faq-generator-ai'),
             array($this, 'render_base_url_field'),
+            'faq-gen-ai-settings',
+            'faq_gen_ai_api_section'
+        );
+        
+        // Custom Base URL
+        register_setting(
+            'faq_gen_ai_settings',
+            'faq_gen_ai_custom_base_url',
+            array(
+                'type' => 'string',
+                'sanitize_callback' => array($this, 'sanitize_url'),
+                'default' => ''
+            )
+        );
+        
+        add_settings_field(
+            'faq_gen_ai_custom_base_url',
+            __('Custom API Base URL', 'faq-generator-ai'),
+            array($this, 'render_custom_base_url_field'),
             'faq-gen-ai-settings',
             'faq_gen_ai_api_section'
         );
@@ -89,7 +108,7 @@ class FAQ_Gen_AI_Settings {
             array(
                 'type' => 'string',
                 'sanitize_callback' => array($this, 'sanitize_model'),
-                'default' => 'gpt-3.5-turbo'
+                'default' => 'gpt-5-nano'
             )
         );
         
@@ -97,6 +116,25 @@ class FAQ_Gen_AI_Settings {
             'faq_gen_ai_model',
             __('Model', 'faq-generator-ai'),
             array($this, 'render_model_field'),
+            'faq-gen-ai-settings',
+            'faq_gen_ai_model_section'
+        );
+        
+        // Custom Model
+        register_setting(
+            'faq_gen_ai_settings',
+            'faq_gen_ai_custom_model',
+            array(
+                'type' => 'string',
+                'sanitize_callback' => array($this, 'sanitize_custom_model'),
+                'default' => ''
+            )
+        );
+        
+        add_settings_field(
+            'faq_gen_ai_custom_model',
+            __('Custom Model', 'faq-generator-ai'),
+            array($this, 'render_custom_model_field'),
             'faq-gen-ai-settings',
             'faq_gen_ai_model_section'
         );
@@ -303,25 +341,84 @@ class FAQ_Gen_AI_Settings {
     
     public function sanitize_model($input) {
         $allowed_models = array(
-            'gpt-3.5-turbo',
+            // GPT-5 Series
+            'gpt-5',
+            'gpt-5-2025-08-07',
+            'gpt-5-mini',
+            'gpt-5-mini-2025-08-07',
+            'gpt-5-nano',
+            'gpt-5-nano-2025-08-07',
+            'gpt-5-chat',
+            'gpt-5-chat-latest',
+            
+            // GPT-4.1 Series
+            'gpt-4.1',
+            'gpt-4.1-2025-04-14',
+            'gpt-4.1-mini',
+            'gpt-4.1-mini-2025-04-14',
+            'gpt-4.1-nano',
+            'gpt-4.1-nano-2025-04-14',
+            
+            // GPT-4 Series (legacy)
             'gpt-4',
             'gpt-4-turbo',
             'gpt-4-turbo-preview',
             'gpt-4o',
             'gpt-4o-mini',
-            'gpt-5-nano'
+            
+            // O3 Series
+            'o3-pro',
+            'o3-pro-2025-06-10',
+            
+            // Gemini 2.5 Series
+            'gemini-2.5-pro',
+            'gemini-2.5-pro-preview-06-05',
+            'gemini-2.5-pro-preview-05-06',
+            'gemini-2.5-pro-preview-03-25',
+            'gemini-2.5-flash',
+            'gemini-2.5-flash-preview-09-2025',
+            'gemini-2.5-flash-preview-05-20',
+            'gemini-2.5-flash-preview-04-17',
+            'gemini-2.5-flash-lite',
+            'gemini-2.5-flash-lite-preview-09-2025',
+            'gemini-2.5-flash-lite-preview-06-17',
+            
+            // Gemini 2.0 Series
+            'gemini-2.0-flash',
+            'gemini-2.0-flash-lite',
+            
+            // Gemini Latest Series
+            'gemini-flash-lite-latest',
+            'gemini-flash-latest',
+            
+
+            // Custom
+            'custom',
         );
         
         $input = sanitize_text_field(trim($input));
         
-        // Allow custom models
+        // If custom is selected, return it
+        if ($input === 'custom') {
+            return 'custom';
+        }
+        
+        // Allow any model that looks valid
         if (!in_array($input, $allowed_models) && !empty($input)) {
-            // Custom model - just sanitize
+            // Custom model - sanitize but allow
             return preg_replace('/[^a-zA-Z0-9\-_.]/', '', $input);
         }
         
-        return in_array($input, $allowed_models) ? $input : 'gpt-3.5-turbo';
+        return in_array($input, $allowed_models) ? $input : 'gpt-5-nano';
     }
+    
+    public function sanitize_custom_model($input) {
+        $input = sanitize_text_field(trim($input));
+        // Allow alphanumeric, hyphens, underscores, dots, colons, and slashes for model names
+        return preg_replace('/[^a-zA-Z0-9\-_.:\/]/', '', $input);
+    }
+    
+    
     
     public function sanitize_temperature($input) {
         $temp = floatval($input);
@@ -440,42 +537,189 @@ class FAQ_Gen_AI_Settings {
     
     public function render_base_url_field() {
         $value = get_option('faq_gen_ai_base_url', 'https://api.openai.com/v1');
+        $base_urls = array(
+            'https://api.openai.com/v1' => 'OpenAI (Default)',
+            'https://openrouter.ai/api/v1' => 'OpenRouter',
+            'https://router.huggingface.co/v1' => 'Hugging Face Router',
+            'https://api.aimlapi.com/v1' => 'AIML API',
+            'https://api.groq.com/openai/v1/' => 'Groq',
+            'https://inference.baseten.co/v1' => 'Baseten',
+            'https://api.avalai.ir/v1' => 'Aval AI',
+            'https://api.gapgpt.app/v1' => 'GapGPT',
+            'custom' => 'Custom URL',
+        );
         ?>
-        <input type="url" 
-               name="faq_gen_ai_base_url" 
-               value="<?php echo esc_attr($value); ?>" 
-               class="regular-text" 
-               placeholder="https://api.openai.com/v1" />
+        <select name="faq_gen_ai_base_url" id="faq_gen_ai_base_url" class="regular-text">
+            <?php foreach ($base_urls as $url => $label): ?>
+                <option value="<?php echo esc_attr($url); ?>" <?php selected($value, $url); ?>>
+                    <?php echo esc_html($label); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
         <p class="description">
-            <?php esc_html_e('Default: https://api.openai.com/v1 (Change only if using a custom endpoint)', 'faq-generator-ai'); ?>
+            <?php esc_html_e('Select your API provider. Choose "Custom URL" to enter your own endpoint.', 'faq-generator-ai'); ?>
         </p>
+        <script>
+        jQuery(document).ready(function($) {
+            $('#faq_gen_ai_base_url').change(function() {
+                if ($(this).val() === 'custom') {
+                    $('#custom_base_url_row').show();
+                } else {
+                    $('#custom_base_url_row').hide();
+                }
+            });
+            
+            // Trigger on load
+            if ($('#faq_gen_ai_base_url').val() === 'custom') {
+                $('#custom_base_url_row').show();
+            } else {
+                $('#custom_base_url_row').hide();
+            }
+        });
+        </script>
         <?php
     }
     
+    public function render_custom_base_url_field() {
+        $value = get_option('faq_gen_ai_custom_base_url', '');
+        $is_custom = get_option('faq_gen_ai_base_url', 'https://api.openai.com/v1') === 'custom';
+        ?>
+        <tr id="custom_base_url_row" style="<?php echo $is_custom ? '' : 'display:none;'; ?>">
+            <th scope="row">
+                <label for="faq_gen_ai_custom_base_url"><?php esc_html_e('Custom API URL', 'faq-generator-ai'); ?></label>
+            </th>
+            <td>
+                <input type="url" 
+                       name="faq_gen_ai_custom_base_url" 
+                       id="faq_gen_ai_custom_base_url"
+                       value="<?php echo esc_attr($value); ?>" 
+                       class="regular-text" 
+                       placeholder="https://your-api-endpoint.com/v1" />
+                <p class="description">
+                    <?php esc_html_e('Enter your custom API base URL (must end with /v1 or appropriate endpoint).', 'faq-generator-ai'); ?>
+                </p>
+            </td>
+        </tr>
+        <?php
+    }
+
+    
     public function render_model_field() {
-        $value = get_option('faq_gen_ai_model', 'gpt-3.5-turbo');
+        $value = get_option('faq_gen_ai_model', 'gpt-5-nano');
         $models = array(
-            'gpt-3.5-turbo' => 'GPT-3.5 Turbo (Fast, Economical)',
-            'gpt-4' => 'GPT-4 (Powerful)',
-            'gpt-4-turbo' => 'GPT-4 Turbo (Fast & Powerful)',
+            // GPT-5 Series
+            'gpt-5' => 'GPT-5 (Latest Flagship)',
+            'gpt-5-2025-08-07' => 'GPT-5 (August 2025)',
+            'gpt-5-mini' => 'GPT-5 Mini (Fast & Efficient)',
+            'gpt-5-mini-2025-08-07' => 'GPT-5 Mini (August 2025)',
+            'gpt-5-nano' => 'GPT-5 Nano (Reasoning - Recommended)',
+            'gpt-5-nano-2025-08-07' => 'GPT-5 Nano (August 2025)',
+            'gpt-5-chat' => 'GPT-5 Chat',
+            'gpt-5-chat-latest' => 'GPT-5 Chat (Latest)',
+            
+            // GPT-4.1 Series
+            'gpt-4.1' => 'GPT-4.1',
+            'gpt-4.1-2025-04-14' => 'GPT-4.1 (April 2025)',
+            'gpt-4.1-mini' => 'GPT-4.1 Mini',
+            'gpt-4.1-mini-2025-04-14' => 'GPT-4.1 Mini (April 2025)',
+            'gpt-4.1-nano' => 'GPT-4.1 Nano',
+            'gpt-4.1-nano-2025-04-14' => 'GPT-4.1 Nano (April 2025)',
+            
+            // GPT-4 Series
+            'gpt-4o' => 'GPT-4o (Optimized)',
+            'gpt-4o-mini' => 'GPT-4o Mini',
+            'gpt-4-turbo' => 'GPT-4 Turbo',
             'gpt-4-turbo-preview' => 'GPT-4 Turbo Preview',
-            'gpt-4o' => 'GPT-4o (Latest)',
-            'gpt-4o-mini' => 'GPT-4o Mini (Fast)',
-            'gpt-5-nano' => 'GPT-5 Nano (Reasoning)',
+            'gpt-4' => 'GPT-4',
+            
+            // O3 Series
+            'o3-pro' => 'O3 Pro (Advanced Reasoning)',
+            'o3-pro-2025-06-10' => 'O3 Pro (June 2025)',
+            
+            // Gemini 2.5 Pro
+            'gemini-2.5-pro' => 'Gemini 2.5 Pro',
+            'gemini-2.5-pro-preview-06-05' => 'Gemini 2.5 Pro Preview (June)',
+            'gemini-2.5-pro-preview-05-06' => 'Gemini 2.5 Pro Preview (May)',
+            'gemini-2.5-pro-preview-03-25' => 'Gemini 2.5 Pro Preview (March)',
+            
+            // Gemini 2.5 Flash
+            'gemini-2.5-flash' => 'Gemini 2.5 Flash',
+            'gemini-2.5-flash-preview-09-2025' => 'Gemini 2.5 Flash Preview (Sep)',
+            'gemini-2.5-flash-preview-05-20' => 'Gemini 2.5 Flash Preview (May)',
+            'gemini-2.5-flash-preview-04-17' => 'Gemini 2.5 Flash Preview (Apr)',
+            
+            // Gemini 2.5 Flash Lite
+            'gemini-2.5-flash-lite' => 'Gemini 2.5 Flash Lite',
+            'gemini-2.5-flash-lite-preview-09-2025' => 'Gemini 2.5 Flash Lite     Preview (Sep)',
+            'gemini-2.5-flash-lite-preview-06-17' => 'Gemini 2.5 Flash Lite Preview     (Jun)',
+            
+            // Gemini 2.0
+            'gemini-2.0-flash' => 'Gemini 2.0 Flash',
+            'gemini-2.0-flash-lite' => 'Gemini 2.0 Flash Lite',
+            
+            // Gemini Latest
+            'gemini-flash-latest' => 'Gemini Flash (Latest)',
+            'gemini-flash-lite-latest' => 'Gemini Flash Lite (Latest)',
+
+            // Custom
+            'custom' => 'Custom Model',
         );
         ?>
-        <select name="faq_gen_ai_model" class="regular-text">
+        <select name="faq_gen_ai_model" id="faq_gen_ai_model" class="regular-text">
             <?php foreach ($models as $model_value => $model_label): ?>
-                <option value="<?php echo esc_attr($model_value); ?>" <?php selected($value, $model_value); ?>>
+                <option value="<?php echo esc_attr($model_value); ?>" <?php selected    ($value, $model_value); ?>>
                     <?php echo esc_html($model_label); ?>
                 </option>
             <?php endforeach; ?>
         </select>
         <p class="description">
-            <?php esc_html_e('Select the AI model. GPT-3.5 Turbo is recommended for most use cases.', 'faq-generator-ai'); ?>
+            <?php esc_html_e('Select the AI model. GPT-5 Nano is recommended for     most use cases with advanced reasoning.', 'faq-generator-ai'); ?>
         </p>
+        <script>
+        jQuery(document).ready(function($) {
+            $('#faq_gen_ai_model').change(function() {
+                if ($(this).val() === 'custom') {
+                    $('#custom_model_row').show();
+                } else {
+                    $('#custom_model_row').hide();
+                }
+            });
+            
+            // Trigger on load
+            if ($('#faq_gen_ai_model').val() === 'custom') {
+                $('#custom_model_row').show();
+            } else {
+                $('#custom_model_row').hide();
+            }
+        });
+        </script>
         <?php
     }
+    
+    public function render_custom_model_field() {
+        $value = get_option('faq_gen_ai_custom_model', '');
+        $is_custom = get_option('faq_gen_ai_model', 'gpt-5-nano') === 'custom';
+        ?>
+        <tr id="custom_model_row" style="<?php echo $is_custom ? '' : 'display:none    ;'; ?>">
+            <th scope="row">
+                <label for="faq_gen_ai_custom_model"><?php esc_html_e('Custom Model     Name', 'faq-generator-ai'); ?></label>
+            </th>
+            <td>
+                <input type="text" 
+                       name="faq_gen_ai_custom_model" 
+                       id="faq_gen_ai_custom_model"
+                       value="<?php echo esc_attr($value); ?>" 
+                       class="regular-text" 
+                       placeholder="llama-3-70b-instruct" />
+                <p class="description">
+                    <?php esc_html_e('Enter your custom model name (e.g., llama-3    -70b-instruct, claude-3-opus, etc.).', 'faq-generator-ai');     ?>
+                </p>
+            </td>
+        </tr>
+        <?php
+    }
+    
+    
     
     public function render_temperature_field() {
         $value = get_option('faq_gen_ai_temperature', 0.5);
