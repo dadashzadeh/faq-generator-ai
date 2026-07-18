@@ -5,7 +5,7 @@ Tags: faq, ai, openai, schema, seo, rank-math, yoast
 Requires at least: 5.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -146,6 +146,14 @@ The plugin doesn't store personal data. API requests contain only your content. 
 8. Mobile responsive design
 
 == Changelog ==
+
+= 1.2.0 - 2026-07-19 =
+* Added: New [faq_display] shortcode to render FAQs stored in post meta
+* Added: Option to output the [faq_display] shortcode instead of raw HTML from the TinyMCE generator
+* Added: Move Up / Move Down buttons in the Schema Manager metabox to reorder FAQs
+* Added: Reload function to sync the metabox with saved schema data
+* Added: Sortable / drag-and-drop styles for the metabox
+* Improved: User-facing messages in the TinyMCE generator
 
 = 1.1.0 - 2025-01-30 =
 * Added: Multilingual support with automatic language detection
