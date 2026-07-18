@@ -33,7 +33,7 @@
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
     color: #fff;
     border-radius: 20px;
     font-size: 13px;
@@ -46,22 +46,22 @@
 }
 
 .faq-toolbar .button {
-    border: 2px solid rgba(255,255,255,0.3);
-    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.15);
     color: #fff;
     font-weight: 600;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
 }
 
 .faq-toolbar .button:hover {
-    background: rgba(255,255,255,0.25);
-    border-color: rgba(255,255,255,0.5);
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
     transform: translateY(-2px);
 }
 
 .faq-toolbar .button-link-delete {
-    background: rgba(220,53,69,0.9);
+    background: rgba(220, 53, 69, 0.9);
     border-color: #dc3545;
 }
 
@@ -95,7 +95,7 @@
 
 .faq-item-card:hover {
     border-color: #667eea;
-    box-shadow: 0 4px 12px rgba(102,126,234,0.15);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
     transform: translateY(-2px);
 }
 
@@ -129,7 +129,7 @@
     justify-content: center;
     font-weight: 700;
     font-size: 14px;
-    box-shadow: 0 2px 8px rgba(102,126,234,0.3);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 .faq-item-content {
@@ -229,7 +229,7 @@
     border-radius: 12px;
     margin: 20px;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .faq-json-header {
@@ -251,7 +251,7 @@
 }
 
 .faq-json-close {
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
     border: none;
     color: #fff;
     padding: 6px 12px;
@@ -261,7 +261,7 @@
 }
 
 .faq-json-close:hover {
-    background: rgba(255,255,255,0.3);
+    background: rgba(255, 255, 255, 0.3);
 }
 
 .faq-json-textarea {
@@ -314,7 +314,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.6);
+    background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(4px);
 }
 
@@ -326,7 +326,7 @@
     max-width: 600px;
     max-height: 90vh;
     overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     animation: modalSlideIn 0.3s ease;
 }
 
@@ -335,6 +335,7 @@
         opacity: 0;
         transform: translateY(-50px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -357,7 +358,7 @@
 }
 
 .faq-modal-close {
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
     border: none;
     color: #fff;
     font-size: 28px;
@@ -373,7 +374,7 @@
 }
 
 .faq-modal-close:hover {
-    background: rgba(255,255,255,0.3);
+    background: rgba(255, 255, 255, 0.3);
     transform: rotate(90deg);
 }
 
@@ -417,7 +418,7 @@
 .faq-form-group textarea:focus {
     outline: none;
     border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .faq-modal-footer {
@@ -468,8 +469,13 @@
 }
 
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Responsive */
@@ -478,27 +484,27 @@
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .faq-toolbar-left,
     .faq-toolbar-right {
         justify-content: center;
     }
-    
+
     .faq-toolbar .button {
         flex: 1;
         text-align: center;
         justify-content: center;
     }
-    
+
     .faq-item-card {
         flex-wrap: wrap;
     }
-    
+
     .faq-modal-dialog {
         width: 95%;
         margin: 20px;
     }
-    
+
     .faq-json-textarea {
         min-height: 300px;
     }
@@ -506,10 +512,74 @@
 
 /* Print */
 @media print {
+
     .faq-toolbar,
     .faq-item-drag,
     .faq-item-actions,
     .faq-json-editor {
         display: none !important;
     }
+}
+
+/* ✅ Sortable placeholder */
+.faq-item-placeholder {
+    height: 70px;
+    background: #f0f0f1;
+    border: 2px dashed #2271b1;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+/* ✅ Dragging state */
+.faq-item-dragging {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    transform: rotate(1deg);
+}
+
+/* ✅ Drag handle cursor */
+.faq-item-drag {
+    cursor: move;
+    cursor: grab;
+    padding: 10px 5px;
+    color: #999;
+    transition: color 0.2s;
+}
+
+.faq-item-drag:hover {
+    color: #2271b1;
+}
+
+.faq-item-drag:active {
+    cursor: grabbing;
+}
+
+/* ✅ Move up/down buttons */
+.faq-item-move-up,
+.faq-item-move-down {
+    background: #f6f7f7 !important;
+    border: 1px solid #ddd !important;
+}
+
+.faq-item-move-up:hover,
+.faq-item-move-down:hover {
+    background: #2271b1 !important;
+    color: #fff !important;
+    border-color: #2271b1 !important;
+}
+
+/* ✅ Highlight save button animation */
+@keyframes highlightPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(34, 113, 177, 0.7);
+    }
+
+    50% {
+        box-shadow: 0 0 0 10px rgba(34, 113, 177, 0);
+    }
+}
+
+.button-primary-highlight {
+    animation: highlightPulse 1s ease-in-out 3;
 }

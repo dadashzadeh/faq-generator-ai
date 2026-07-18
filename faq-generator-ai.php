@@ -3,7 +3,7 @@
  * Plugin Name: FAQ Generator AI
  * Plugin URI: https://wordpress.org/plugins/faq-generator-ai/
  * Description: Generate FAQs using AI with TinyMCE integration. Compatible with RankMath.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Author: Mohammad Dadashzadeh
  * Author URI: https://dadashzadeh.org/
  * License: GPL v2 or later
@@ -15,12 +15,11 @@
  * Domain Path: /languages
  */
 
-
 if (!defined('ABSPATH')) {
     exit;
 }
 
-define('FAQ_GEN_AI_VERSION', '1.1.0');
+define('FAQ_GEN_AI_VERSION', '1.2.0');
 define('FAQ_GEN_AI_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('FAQ_GEN_AI_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -64,6 +63,87 @@ class FAQ_Generator_AI {
         
         // Add frontend styles
         add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_styles'));
+        
+        // ✅ NEW: Register shortcode
+        add_shortcode('faq_display', array($this, 'render_faq_shortcode'));
+    }
+    
+    /**
+     * ✅ NEW: Render FAQ Shortcode
+     * This reads from post_meta so changes in metabox are always reflected
+     */
+    public function render_faq_shortcode($atts) {
+        global $post;
+        
+        // Parse attributes
+        $atts = shortcode_atts(array(
+            'post_id' => 0,
+            'show_title' => 'auto', // auto, yes, no
+        ), $atts, 'faq_display');
+        
+        // Get post ID
+        $post_id = intval($atts['post_id']);
+        if ($post_id === 0 && $post) {
+            $post_id = $post->ID;
+        }
+        
+        if (!$post_id) {
+            return '<!-- FAQ Display: No post ID -->';
+        }
+        
+        // Get schema from post meta
+        $schema = get_post_meta($post_id, '_faq_gen_ai_schema', true);
+        
+        if (empty($schema)) {
+            return '<!-- FAQ Display: No FAQ schema found -->';
+        }
+        
+        $schema_data = json_decode($schema, true);
+        
+        if (!$schema_data || !isset($schema_data['mainEntity']) || empty($schema_data['mainEntity'])) {
+            return '<!-- FAQ Display: Invalid or empty schema -->';
+        }
+        
+        // Build HTML output
+        $html = '';
+        
+        // Determine if we should show title
+        $show_title = $atts['show_title'];
+        if ($show_title === 'auto') {
+            $show_title = (get_option('faq_gen_ai_show_title', '1') === '1') ? 'yes' : 'no';
+        }
+        
+        // Add title
+        if ($show_title === 'yes') {
+            $is_rtl = is_rtl();
+            $title = $is_rtl 
+                ? get_option('faq_gen_ai_title_fa', 'سوالات متداول') 
+                : get_option('faq_gen_ai_title_en', 'Frequently Asked Questions');
+            $dir = $is_rtl ? 'rtl' : 'ltr';
+            
+            $html .= '<h2 class="faq-section-title" dir="' . esc_attr($dir) . '">' . esc_html($title) . '</h2>' . "\n";
+        }
+        
+        // FAQ section
+        $html .= '<div class="faq-section">' . "\n";
+        
+        foreach ($schema_data['mainEntity'] as $item) {
+            $question = isset($item['name']) ? $item['name'] : '';
+            $answer = isset($item['acceptedAnswer']['text']) ? $item['acceptedAnswer']['text'] : '';
+            
+            if (empty($question) || empty($answer)) {
+                continue;
+            }
+            
+            $html .= '<div class="faq-item">';
+            $html .= '<h3 class="faq-question">' . esc_html($question) . '</h3>';
+            $html .= '<div class="faq-answer"><p>' . esc_html($answer) . '</p></div>';
+            $html .= '</div>' . "\n";
+        }
+        
+        $html .= '</div>';
+        
+        return $html;
     }
     
     public function enqueue_frontend_styles() {
@@ -121,11 +201,15 @@ class FAQ_Generator_AI {
         $output_format = isset($_POST['output_format']) ? sanitize_text_field($_POST['output_format']) : 'both';
         $faq_count = isset($_POST['faq_count']) ? intval($_POST['faq_count']) : intval(get_option('faq_gen_ai_default_count', 5));
         
+        // ✅ NEW: Check if shortcode mode is enabled
+        $use_shortcode = isset($_POST['use_shortcode']) ? ($_POST['use_shortcode'] === 'true' || $_POST['use_shortcode'] === '1') : true;
+        
         if ($debug_mode) {
             error_log('FAQ Generator: Input prompt: ' . $prompt);
             error_log('FAQ Generator: Post ID: ' . $post_id);
             error_log('FAQ Generator: Format: ' . $output_format);
             error_log('FAQ Generator: Count: ' . $faq_count);
+            error_log('FAQ Generator: Use Shortcode: ' . ($use_shortcode ? 'yes' : 'no'));
         }
         
         // Check if prompt is provided
@@ -177,6 +261,12 @@ class FAQ_Generator_AI {
                 }
                 wp_send_json_error('Generated content is empty. Please try again with a different prompt.');
                 return;
+            }
+            
+            // ✅ NEW: If shortcode mode, replace content with shortcode
+            if ($use_shortcode) {
+                $result['content'] = '[faq_display]';
+                $result['use_shortcode'] = true;
             }
             
             if ($debug_mode) {

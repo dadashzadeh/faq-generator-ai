@@ -81,11 +81,6 @@
     margin-bottom: 0;
 }
 
-/* TinyMCE Dialog Styles */
-.mce-container-body .mce-textbox {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-}
-
 .mce-container-body .mce-label {
     font-weight: 600;
 }
